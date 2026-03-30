@@ -1,9 +1,0 @@
-*.pnggit filter=lfs diff=lfs merge=lfs -text
-lfs filter=lfs diff=lfs merge=lfs -text
-track filter=lfs diff=lfs merge=lfs -text
-*.jpggit filter=lfs diff=lfs merge=lfs -text
-*.mp3git filter=lfs diff=lfs merge=lfs -text
-*.fbxgit filter=lfs diff=lfs merge=lfs -text
-*.wavgit filter=lfs diff=lfs merge=lfs -text
-*.prefabgit filter=lfs diff=lfs merge=lfs -text
-*.asset filter=lfs diff=lfs merge=lfs -text
