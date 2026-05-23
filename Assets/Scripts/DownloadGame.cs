@@ -20,20 +20,27 @@ public class DownloadGame : MonoBehaviour
     public float progress = 0f;
 
     // How much progress increases per click.
-    public float increaseAmount = 5f;
+    public float increaseAmount = 7f;
 
     // How much progress decreases per second.
-    public float decreaseAmount = 4f;
+    public float decreaseAmount = 1f;
 
     [Header("Danger Zone Settings")]
     // Minimum time before the next danger zone starts.
-    public float minSafeTime = 2f;
+    public float minSafeTime = 1f;
 
     // Maximum time before the next danger zone starts.
-    public float maxSafeTime = 4f;
+    public float maxSafeTime = 1.8f;
 
     // How long the danger zone lasts.
-    public float dangerDuration = 2.5f;
+    public float dangerDuration = 1.6f;
+
+    [Header("Button State Colors")]
+    // 안전하게 누를 수 있는 상태의 버튼 색상
+    public Color normalButtonColor = new Color(0.25f, 0.55f, 1f, 1f);
+
+    // 누르면 실패하는 검증 상태의 버튼 색상
+    public Color dangerButtonColor = new Color(0.9f, 0.2f, 0.2f, 1f);
 
     private bool isCleared = false;
     private bool isFailed = false;
@@ -210,6 +217,13 @@ public class DownloadGame : MonoBehaviour
             if (buttonText != null)
             {
                 buttonText.text = isDangerZone ? "누르지 마세요" : "다운로드 가속";
+            }
+
+            Image buttonImage = clickButton.GetComponent<Image>();
+
+            if (buttonImage != null)
+            {
+                buttonImage.color = isDangerZone ? dangerButtonColor : normalButtonColor;
             }
         }
     }
