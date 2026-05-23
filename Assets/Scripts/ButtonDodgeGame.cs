@@ -122,8 +122,14 @@ public class ButtonDodgeGame : MonoBehaviour
             fakeButtons[index].onClick.AddListener(() => OnFakeButtonClicked(index));
         }
 
+        nextButton.onClick.RemoveAllListeners();
+        nextButton.onClick.AddListener(GoToNextStage);
+
         retryButton.onClick.RemoveAllListeners();
-        retryButton.onClick.AddListener(RetryGame);
+        retryButton.onClick.AddListener(GoToMainAfterFail);
+
+        SetButtonText(nextButton, "다음 단계");
+        SetButtonText(retryButton, "처음부터 다시");
 
         SetupRound();
         UpdateUI();
@@ -348,6 +354,8 @@ public class ButtonDodgeGame : MonoBehaviour
 
         nextButton.gameObject.SetActive(true);
         retryButton.gameObject.SetActive(false);
+
+        KeepFakeButtonsAboveRealButton();
     }
 
     void FailGame(string message)
@@ -355,6 +363,8 @@ public class ButtonDodgeGame : MonoBehaviour
         isFailed = true;
 
         resultText.text = message;
+        timerText.text = "";
+        countText.text = "";
 
         realInstallButton.gameObject.SetActive(false);
 
@@ -365,10 +375,44 @@ public class ButtonDodgeGame : MonoBehaviour
 
         nextButton.gameObject.SetActive(false);
         retryButton.gameObject.SetActive(true);
+
+        KeepFakeButtonsAboveRealButton();
     }
 
-    void RetryGame()
+    void GoToNextStage()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>();
+        if (buttonText != null)
+        {
+            buttonText.text = text;
+        }
     }
 }

@@ -1847,10 +1847,10 @@ MonoBehaviour:
   retryButton: {fileID: 1621248205}
   progress: 0
   increaseAmount: 7
-  decreaseAmount: 2
-  minSafeTime: 3
-  maxSafeTime: 6
-  dangerDuration: 2
+  decreaseAmount: 1
+  minSafeTime: 1
+  maxSafeTime: 1.8
+  dangerDuration: 1.6
 --- !u!4 &1770964752
 Transform:
   m_ObjectHideFlags: 0

@@ -22,14 +22,6 @@ public class PopupCloseGame : MonoBehaviour
     public Transform popupParent;
 
     [Header("Game Settings")]
-    // 난이도 조절 구간
-    // timeLimit: 제한 시간. 낮을수록 어려움
-    // targetCloseCount: 닫아야 하는 팝업 수. 많을수록 어려움
-    // maxActivePopups: 동시에 떠 있는 전체 팝업 수. 많을수록 정신없음
-    // initialPopupCount: 시작 시 바로 뜨는 팝업 수
-    // spawnInterval: 몇 초마다 새 팝업을 추가로 생성할지
-    // safeStartDuration: 시작 후 이 시간 동안은 중요 팝업이 나오지 않음
-    // importantPopupChance: 중요 팝업 등장 확률. 높을수록 어려움
     public float timeLimit = 15f;
     public int targetCloseCount = 15;
     public int maxActivePopups = 7;
@@ -92,7 +84,14 @@ public class PopupCloseGame : MonoBehaviour
 
         resultText.text = "광고/추적 팝업만 닫고, 중요 설치 창은 닫지 마세요.";
 
-        retryButton.onClick.AddListener(RetryGame);
+        nextButton.onClick.RemoveAllListeners();
+        nextButton.onClick.AddListener(GoToNextStage);
+
+        retryButton.onClick.RemoveAllListeners();
+        retryButton.onClick.AddListener(GoToMainAfterFail);
+
+        SetButtonText(nextButton, "다음 단계");
+        SetButtonText(retryButton, "처음부터 다시");
 
         UpdateUI();
 
@@ -140,7 +139,6 @@ public class PopupCloseGame : MonoBehaviour
         bool spawnImportant = canSpawnImportant && Random.value < importantPopupChance;
 
         // 닫아야 하는 팝업이 하나도 없으면 무조건 닫아야 하는 팝업 생성.
-        // 플레이어가 할 수 있는 행동이 없는 불합리한 상황을 막기 위함.
         if (closeableCount <= 0)
         {
             spawnImportant = false;
@@ -245,6 +243,8 @@ public class PopupCloseGame : MonoBehaviour
         isFailed = true;
 
         resultText.text = message;
+        timerText.text = "";
+        countText.text = "";
 
         ClearAllPopups();
 
@@ -265,8 +265,40 @@ public class PopupCloseGame : MonoBehaviour
         activePopups.Clear();
     }
 
-    void RetryGame()
+    void GoToNextStage()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>();
+        if (buttonText != null)
+        {
+            buttonText.text = text;
+        }
     }
 }

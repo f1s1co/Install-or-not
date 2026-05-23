@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+
 public class Falldown_UI : MonoBehaviour
 {
     [Header("UI Elements")]
@@ -14,71 +13,182 @@ public class Falldown_UI : MonoBehaviour
     [Header("Game Over")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI gameOverProgressText;
-    [SerializeField] private Button restartButton;
+    [SerializeField] private Button failRestartButton;
 
     [Header("Win Screen")]
     [SerializeField] private GameObject winPanel;
     [SerializeField] private TextMeshProUGUI winText;
-
-    private Falldown_Manager gameManager;
+    [SerializeField] private Button winNextButton;
 
     void Start()
     {
-        gameManager = FindObjectOfType<Falldown_Manager>();
-
-        if (restartButton != null)
+        if (winNextButton != null)
         {
-            restartButton.onClick.AddListener(() => { 
-                SceneManager.LoadScene(0);
-            });
+            winNextButton.onClick.RemoveAllListeners();
+            winNextButton.onClick.AddListener(GoToNextStage);
+            SetButtonText(winNextButton, "다음 단계");
         }
-        HideGameOverScreen();
 
+        if (failRestartButton != null)
+        {
+            failRestartButton.onClick.RemoveAllListeners();
+            failRestartButton.onClick.AddListener(GoToMainAfterFail);
+            SetButtonText(failRestartButton, "처음부터 다시");
+        }
 
+        HideResultScreens();
     }
 
     public void UpdateProgress(float progress)
     {
-        progressSlider.value = progress;
-        progressText.text = progress.ToString("F0") + "%";
+        if (progressSlider != null)
+        {
+            progressSlider.value = progress;
+        }
+
+        if (progressText != null)
+        {
+            progressText.text = progress.ToString("F0") + "%";
+        }
     }
 
     public void UpdateLives(int lives)
     {
+        if (lifeImages == null) return;
+
         for (int i = 0; i < lifeImages.Length; i++)
         {
-            lifeImages[i].enabled = i < lives;
+            if (lifeImages[i] != null)
+            {
+                lifeImages[i].enabled = i < lives;
+            }
         }
     }
 
     public void ShowGameOverScreen(float finalProgress)
     {
-        gameOverPanel.SetActive(true);
-        winPanel.SetActive(false);
-
-        if (restartButton != null)
+        if (gameOverPanel != null)
         {
-            restartButton.gameObject.SetActive(true);
+            gameOverPanel.SetActive(true);
         }
 
-        gameOverProgressText.enableWordWrapping = false;
-        gameOverProgressText.text = "Failed! Progress is " + finalProgress.ToString("F0") + "%";
+        if (winPanel != null)
+        {
+            winPanel.SetActive(false);
+        }
+
+        if (gameOverProgressText != null)
+        {
+            gameOverProgressText.enableWordWrapping = false;
+            gameOverProgressText.text = "실패! 진행률: " + finalProgress.ToString("F0") + "%";
+        }
+
+        if (failRestartButton != null)
+        {
+            failRestartButton.gameObject.SetActive(true);
+            failRestartButton.transform.SetAsLastSibling();
+        }
+
+        if (winNextButton != null)
+        {
+            winNextButton.gameObject.SetActive(false);
+        }
     }
 
     public void ShowWinScreen()
     {
-        winPanel.SetActive(true);
-        gameOverPanel.SetActive(false);
-        winText.text = "Successfully installed!";
+        if (winPanel != null)
+        {
+            winPanel.SetActive(true);
+        }
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
+        if (winText != null)
+        {
+            winText.text = "다운로드 완료!";
+        }
+
+        if (winNextButton != null)
+        {
+            winNextButton.gameObject.SetActive(true);
+            winNextButton.transform.SetAsLastSibling();
+        }
+
+        if (failRestartButton != null)
+        {
+            failRestartButton.gameObject.SetActive(false);
+        }
     }
 
+    public void HideResultScreens()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
+        if (winPanel != null)
+        {
+            winPanel.SetActive(false);
+        }
+
+        if (winNextButton != null)
+        {
+            winNextButton.gameObject.SetActive(false);
+        }
+
+        if (failRestartButton != null)
+        {
+            failRestartButton.gameObject.SetActive(false);
+        }
+    }
+
+    // 기존 Falldown_Manager.cs에서 이 함수명을 호출하고 있어서 유지해야 함.
+    // 내부적으로는 새 결과 화면 숨김 함수로 연결한다.
     public void HideGameOverScreen()
     {
-        gameOverPanel.SetActive(false);
-        winPanel.SetActive(false);
-        if (restartButton != null)
+        HideResultScreens();
+    }
+
+    void GoToNextStage()
+    {
+        if (GameFlowManager.Instance != null)
         {
-            restartButton.gameObject.SetActive(false);
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (buttonText != null)
+        {
+            buttonText.text = text;
         }
     }
 }

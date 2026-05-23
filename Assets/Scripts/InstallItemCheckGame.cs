@@ -62,9 +62,19 @@ public class InstallItemCheckGame : MonoBehaviour
 
         resultText.text = "항목 설명을 읽고 설치 허용 또는 차단을 선택하세요.";
 
+        allowButton.onClick.RemoveAllListeners();
+        blockButton.onClick.RemoveAllListeners();
+        nextButton.onClick.RemoveAllListeners();
+        retryButton.onClick.RemoveAllListeners();
+
         allowButton.onClick.AddListener(() => SelectAnswer(true));
         blockButton.onClick.AddListener(() => SelectAnswer(false));
-        retryButton.onClick.AddListener(RetryGame);
+
+        nextButton.onClick.AddListener(GoToNextStage);
+        retryButton.onClick.AddListener(GoToMainAfterFail);
+
+        SetButtonText(nextButton, "다음 단계");
+        SetButtonText(retryButton, "처음부터 다시");
 
         CreateItemList();
         LoadCurrentItem();
@@ -286,6 +296,8 @@ public class InstallItemCheckGame : MonoBehaviour
         isFailed = true;
 
         resultText.text = message;
+        timerText.text = "";
+        countText.text = "";
 
         allowButton.gameObject.SetActive(false);
         blockButton.gameObject.SetActive(false);
@@ -294,9 +306,41 @@ public class InstallItemCheckGame : MonoBehaviour
         retryButton.gameObject.SetActive(true);
     }
 
-    void RetryGame()
+    void GoToNextStage()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>();
+        if (buttonText != null)
+        {
+            buttonText.text = text;
+        }
     }
 
     void Shuffle(List<InstallItemData> list)

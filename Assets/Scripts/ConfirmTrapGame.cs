@@ -69,9 +69,19 @@ public class ConfirmTrapGame : MonoBehaviour
         retryButton.gameObject.SetActive(false);
         resultText.text = "";
 
+        yesButton.onClick.RemoveAllListeners();
+        noButton.onClick.RemoveAllListeners();
+        nextButton.onClick.RemoveAllListeners();
+        retryButton.onClick.RemoveAllListeners();
+
         yesButton.onClick.AddListener(() => SelectAnswer(true));
         noButton.onClick.AddListener(() => SelectAnswer(false));
-        retryButton.onClick.AddListener(RetryGame);
+
+        nextButton.onClick.AddListener(GoToNextStage);
+        retryButton.onClick.AddListener(GoToMainAfterFail);
+
+        SetButtonText(nextButton, "다음 단계");
+        SetButtonText(retryButton, "처음부터 다시");
 
         CreateQuestionList();
         LoadQuestion();
@@ -239,6 +249,8 @@ public class ConfirmTrapGame : MonoBehaviour
         isFailed = true;
 
         resultText.text = failMessage;
+        timerText.text = "";
+        progressText.text = "";
 
         yesButton.gameObject.SetActive(false);
         noButton.gameObject.SetActive(false);
@@ -247,11 +259,41 @@ public class ConfirmTrapGame : MonoBehaviour
         retryButton.gameObject.SetActive(true);
     }
 
-    void RetryGame()
+    void GoToNextStage()
     {
-        // 현재는 테스트용으로 현재 미니게임 씬만 재시작.
-        // 전체 구조 연결 후에는 메인 메뉴 또는 1단계 씬으로 이동하도록 수정 예정.
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>();
+        if (buttonText != null)
+        {
+            buttonText.text = text;
+        }
     }
 
     void Shuffle(List<QuestionData> list)

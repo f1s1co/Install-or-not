@@ -49,8 +49,17 @@ public class DownloadGame : MonoBehaviour
         retryButton.gameObject.SetActive(false);
 
         // Register button events.
+        clickButton.onClick.RemoveAllListeners();
         clickButton.onClick.AddListener(BoostDownload);
-        retryButton.onClick.AddListener(RetryGame);
+
+        nextButton.onClick.RemoveAllListeners();
+        nextButton.onClick.AddListener(GoToNextStage);
+
+        retryButton.onClick.RemoveAllListeners();
+        retryButton.onClick.AddListener(GoToMainAfterFail);
+
+        SetButtonText(nextButton, "다음 단계");
+        SetButtonText(retryButton, "처음부터 다시");
 
         ScheduleNextDangerZone();
 
@@ -163,10 +172,30 @@ public class DownloadGame : MonoBehaviour
         UpdateUI();
     }
 
-    void RetryGame()
+    void GoToNextStage()
     {
-        // Reload current scene to reset the minigame completely.
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameClear();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    void GoToMainAfterFail()
+    {
+        if (GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnMiniGameFail();
+        }
+        else
+        {
+            Debug.LogWarning("GameFlowManager가 없어 현재 씬을 다시 시작합니다.");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     void UpdateUI()
@@ -182,6 +211,17 @@ public class DownloadGame : MonoBehaviour
             {
                 buttonText.text = isDangerZone ? "누르지 마세요" : "다운로드 가속";
             }
+        }
+    }
+
+    void SetButtonText(Button button, string text)
+    {
+        if (button == null) return;
+
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>();
+        if (buttonText != null)
+        {
+            buttonText.text = text;
         }
     }
 }
